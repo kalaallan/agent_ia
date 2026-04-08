@@ -1,0 +1,43 @@
+# --- BACKEND (Python) ---
+# Environnement virtuel
+venv/
+.venv/
+env/
+Include/
+Lib/
+Scripts/
+pyvenv.cfg
+
+# Cache Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Configuration & Secrets
+.env
+.flaskenv
+
+# --- FRONTEND (Node/React/Vite) ---
+# Dépendances
+node_modules/
+jspm_packages/
+
+# Build
+dist/
+dist-ssr/
+*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- EDITEURS & OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- DIVERS ---
+# On ignore les fichiers Word de doc s'ils ne doivent pas être sur Git
+*.docx
