@@ -1,43 +1,32 @@
-# --- BACKEND (Python) ---
-# Environnement virtuel
+# --- ENVIRONNEMENT VIRTUEL (BACKEND) ---
+# On ignore le dossier qui contient l'installation de Python
+backend/aicoach_back/
+
+# Au cas où tu créerais d'autres venv standard plus tard
 venv/
 .venv/
 env/
-Include/
-Lib/
-Scripts/
-pyvenv.cfg
 
-# Cache Python
-__pycache__/
+# --- CODE PYTHON (CACHE) ---
+**/__pycache__/
 *.py[cod]
 *$py.class
 
-# Configuration & Secrets
-.env
-.flaskenv
-
 # --- FRONTEND (Node/React/Vite) ---
-# Dépendances
 node_modules/
-jspm_packages/
-
-# Build
 dist/
 dist-ssr/
 *.local
-
-# Logs
 npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+
+# --- CONFIGURATION & SECRETS ---
+.env
+.env.*
+# On ignore aussi le fichier Word si c'est juste de la doc perso
+*.docx
 
 # --- EDITEURS & OS ---
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
-
-# --- DIVERS ---
-# On ignore les fichiers Word de doc s'ils ne doivent pas être sur Git
-*.docx
