@@ -1,13 +1,20 @@
-import { } from 'react'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Appzone from "./pages/Appzone";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 
 const App = () => {
   return (
-    <div className="bg-blue-500 text-white p-10">
-      Tailwind OK 🚀
-    </div>
+    <Router>
+      <div className="">
+        <Routes>
+          <Route path="/" element={<Appzone />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+        </Routes>
+      </div>
+    </Router>
   );
-}
+};
 
-
-export default App
+export default App;
