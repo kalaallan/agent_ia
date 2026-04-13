@@ -1,6 +1,6 @@
 from fastapi import APIRouter, UploadFile, File
 from app.models.schemas import PDFResponse
-from app.services.langfuse_client import analyser_pdf_with_trace
+from app.services.analyse.langfuse_client import analyser_pdf_with_trace
 
 router = APIRouter()
 

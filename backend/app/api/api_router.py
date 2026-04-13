@@ -1,9 +1,16 @@
 from fastapi import APIRouter
-from app.api.agents import comprehension  # Import de ton fichier agent
+from app.api.agents import comprehension, decomposition
 
 api_router = APIRouter()
 
-# On inclut le router de l'agent avec un préfixe et un tag pour la doc
 api_router.include_router(
-    comprehension.router, prefix="/comprehension", tags=["Agents"]
+    comprehension.router,
+    prefix="/analyse",
+    tags=["Agents1"],
+)
+
+api_router.include_router(
+    decomposition.router,
+    prefix="/comprehension",
+    tags=["Agents2"],
 )

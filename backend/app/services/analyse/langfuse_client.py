@@ -1,5 +1,5 @@
 from app.utils.langfuse_utils import langfuse_client
-from app.services.ai_service import analyser_pdf_gemini
+from app.services.analyse.ai_service import analyser_pdf_gemini
 
 
 def analyser_pdf_with_trace(
