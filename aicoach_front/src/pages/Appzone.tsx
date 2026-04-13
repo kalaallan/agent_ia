@@ -2,7 +2,9 @@ import { useState, useRef } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { analysePDF } from "../services/Iacoach";
-import type { PDFResponse } from "../types/Iacoach_types";
+import { comprehensionPDF } from "../services/Iacoach";
+import type { PDFResponse, ComprehensionResponse } from "../types/Iacoach_types";
+
 
 const Appzone = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -11,10 +13,48 @@ const Appzone = () => {
   const [result, setResult] = useState<PDFResponse | null>(null);
   const [phase, setPhase] = useState<"idle" | "loading" | "result">("idle");
 
+  const [onlyComprehension, setOnlyComprehension] = useState<boolean>(false);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setFile(e.target.files[0]);
     }
+  };
+
+  const [showComprehension, setShowComprehension] = useState(false);
+  const [comprehension, setComprehension] = useState<ComprehensionResponse | null>(null);
+  const [loadingComprehension, setLoadingComprehension] = useState(false);
+
+  const handleComprehension = async () => {
+    if (!file) return;
+
+    if (onlyComprehension === false) {
+      setShowComprehension(true);
+      setLoadingComprehension(true);
+      setComprehension(null);
+      
+      try {
+        const res: ComprehensionResponse = await comprehensionPDF(file);
+        console.log("Comprehension API :", res);
+        setComprehension(res);
+        setOnlyComprehension(true);
+      } catch (err) {
+        console.error(err);
+        setOnlyComprehension(false);
+        setComprehension({
+          conseils: ["Erreur lors de la récupération des données"],
+          prerequis: [""],
+          outils: [""],
+          temps_estime: 0,
+          warning: ["API_ERROR"],
+        });
+      } finally {
+        setLoadingComprehension(false);
+      }
+    } else {
+      setShowComprehension(true);
+    }
+
   };
 
   const handleRemoveFile = () => {
@@ -24,7 +64,7 @@ const Appzone = () => {
 
   const handleUpload = async () => {
     if (!file) return;
-
+    setOnlyComprehension(false);
     setPhase("loading");
     setResult(null);
 
@@ -43,6 +83,10 @@ const Appzone = () => {
     setFile(null);
     setResult(null);
     setPhase("idle");
+    setShowComprehension(false);
+    setLoadingComprehension(false);
+    setComprehension(null);
+    setOnlyComprehension(false);
     if (inputRef.current) inputRef.current.value = "";
   };
 
@@ -192,19 +236,139 @@ const Appzone = () => {
                   </button>
 
                   {result.type_contenu === "probleme" && (
-                    <button
-                      disabled
-                      className="px-5 py-2 rounded-xl border border-blue-200
-                      text-blue-700 bg-blue-50 opacity-70 cursor-not-allowed
-                      transition shadow-sm"
-                    >
-                      Compréhension
-                    </button>
+                    <>
+                      <button
+                        onClick={handleComprehension}
+                        className="px-5 py-2 rounded-xl border border-blue-200
+                        text-blue-700 bg-blue-50 hover:bg-blue-100
+                        transition shadow-sm"
+                      >
+                        Compréhension
+                      </button>
+                      <button
+                        disabled
+                        className="px-5 py-2 rounded-xl border border-yellow-200
+                          text-yellow-700 bg-yellow-50 transition shadow-sm disabled:opacity-50 
+                            disabled:cursor-not-allowed disabled:hover:bg-yellow-50 disabled:shadow-none"
+                      >
+                        Indices résolution
+                      </button>
+
+                      <button
+                        disabled
+                        className="px-5 py-2 rounded-xl border border-green-200
+                        text-green-700 bg-green-50 transition shadow-sm disabled:opacity-50 
+                          disabled:cursor-not-allowed disabled:hover:bg-green-50 disabled:shadow-none"
+                      >
+                        ~Solution
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
             )}
           </div>
+          {showComprehension && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center">
+
+              {/* BACKDROP */}
+              <div
+                className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                onClick={() => !loadingComprehension && setShowComprehension(false)}
+              />
+
+              {/* CONTENU */}
+              <div className="relative w-full max-w-2xl mx-4">
+
+                {/* LOADING */}
+                {loadingComprehension ? (
+                  <div className="flex flex-col items-center justify-center py-20">
+                    <div className="w-10 h-10 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-4" />
+                    <p className="text-sm text-gray-200">
+                      Chargement de la compréhension...
+                    </p>
+                  </div>
+                ) : comprehension && (
+                  /* MODAL */
+                  <div className="bg-white rounded-2xl shadow-xl p-6 animate-fadeIn max-h-[80vh] overflow-y-auto">
+
+                    {/* HEADER */}
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-xl font-semibold">
+                        Aide à la compréhension
+                      </h3>
+
+                      <button
+                        onClick={() => setShowComprehension(false)}
+                        className="text-gray-400 hover:text-gray-600 text-xl"
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    {/* TAG */}
+                    <div className="mb-4">
+                      <span className="text-xs px-3 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-200">
+                        {comprehension.warning?.[0]}
+                      </span>
+                    </div>
+
+                    {/* CONSEILS */}
+                    <div className="mb-5">
+                      <p className="text-sm font-semibold mb-2">Conseils</p>
+                      <ul className="space-y-2">
+                        {comprehension.conseils.map((item, i) => (
+                          <li key={i} className="text-sm text-gray-700 flex gap-2">
+                            <span className="text-blue-500">•</span>
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* PREREQUIS */}
+                    <div className="mb-5">
+                      <p className="text-sm font-semibold mb-2">Prérequis</p>
+                      <div className="flex flex-wrap gap-2">
+                        {comprehension.prerequis.map((item, i) => (
+                          <span
+                            key={i}
+                            className="px-3 py-1 text-xs rounded-full bg-amber-50 text-amber-700 border border-amber-200"
+                          >
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* OUTILS */}
+                    <div className="mb-5">
+                      <p className="text-sm font-semibold mb-2">Outils</p>
+                      <div className="flex flex-wrap gap-2">
+                        {comprehension.outils.map((item, i) => (
+                          <span
+                            key={i}
+                            className="px-3 py-1 text-xs rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200"
+                          >
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* TEMPS */}
+                    <div className="bg-gray-50 rounded-xl px-4 py-3 flex justify-between">
+                      <span className="text-sm text-gray-600">Temps estimé</span>
+                      <span className="text-sm font-semibold">
+                        ~ {comprehension.temps_estime} min
+                      </span>
+                    </div>
+
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </main>
 

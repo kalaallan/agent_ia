@@ -26,6 +26,8 @@ def analyser_pdf_gemini(pdf_bytes: bytes) -> dict:
         "2. Si le type est 'probleme', explique brièvement pourquoi dans la raison.\n"
         "3. Réponds uniquement en JSON.\n\n"
         'Exemple : {"type": "information", "raison": "Il n\'y a pas de problème à résoudre."}'
+        "\n\n Remarque: s'il y a une question dans le pdf, c'est qu'il y a un problème à résoudre. "
+        "Et tu dois expliquer dans la raison pourquoi c'est un problème."
     )
 
     txt = call_gemini_with_retry(uploaded_file, prompt)

@@ -128,6 +128,7 @@ Retourne STRICTEMENT du JSON :
   "temps_estime": 0,
   "warning": ["Gemini"]
 }
+le retour de Gemini dans warning est obligatoire
 """
 
         txt = call_gemini_with_retry(uploaded_file, prompt)
