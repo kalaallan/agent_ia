@@ -17,7 +17,7 @@ async def hint_solver_pdf(file: UploadFile = File(...)):
         pdf_bytes = await file.read()
 
         resultat = await process_pdf(pdf_bytes)
-
+        print("Resultat from process_pdf:", resultat)
         return resultat
 
     except Exception as e:

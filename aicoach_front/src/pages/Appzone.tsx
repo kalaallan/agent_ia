@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import Hints from "../components/Hints";
 import { analysePDF } from "../services/Iacoach";
 import { comprehensionPDF } from "../services/Iacoach";
 import type { PDFResponse, ComprehensionResponse } from "../types/Iacoach_types";
@@ -10,10 +11,12 @@ const Appzone = () => {
   const [file, setFile] = useState<File | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const [result, setResult] = useState<PDFResponse | null>(null);
+  const [result, setResult] = useState<PDFResponse | null>(null)
+  const [viderHints, setViderHints] = useState(false);
   const [phase, setPhase] = useState<"idle" | "loading" | "result">("idle");
 
   const [onlyComprehension, setOnlyComprehension] = useState<boolean>(false);
+  const [showHint, setShowHint] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -80,6 +83,8 @@ const Appzone = () => {
   };
 
   const resetAll = () => {
+    setShowHint(false);
+    setViderHints(true);
     setFile(null);
     setResult(null);
     setPhase("idle");
@@ -95,7 +100,7 @@ const Appzone = () => {
       <Header />
 
       <main className="grow bg-gray-50 p-10">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <h1 className="text-4xl font-bold mb-4">
             Bienvenue sur Appzone
           </h1>
@@ -246,22 +251,23 @@ const Appzone = () => {
                         Compréhension
                       </button>
                       <button
-                        disabled
                         className="px-5 py-2 rounded-xl border border-yellow-200
-                          text-yellow-700 bg-yellow-50 transition shadow-sm disabled:opacity-50 
-                            disabled:cursor-not-allowed disabled:hover:bg-yellow-50 disabled:shadow-none"
+                        text-yellow-700 bg-yellow-50 hover:bg-yellow-100
+                        transition shadow-sm"
+                        onClick={() => setShowHint(true)}
                       >
                         Indices résolution
                       </button>
-
+{/* 
                       <button
                         disabled
                         className="px-5 py-2 rounded-xl border border-green-200
-                        text-green-700 bg-green-50 transition shadow-sm disabled:opacity-50 
-                          disabled:cursor-not-allowed disabled:hover:bg-green-50 disabled:shadow-none"
+                        text-green-700 bg-green-50 hover:bg-green-100
+                        transition shadow-sm"
                       >
                         ~Solution
                       </button>
+*/}
                     </>
                   )}
                 </div>
@@ -369,6 +375,11 @@ const Appzone = () => {
               </div>
             </div>
           )}
+        {showHint && (
+          <div className="mt-10 bg-white rounded-2xl shadow-lg p-8 border border-gray-200 transition-all duration-500">
+            <Hints viderHint={viderHints} file={file} />
+          </div>
+        )}
         </div>
       </main>
 
