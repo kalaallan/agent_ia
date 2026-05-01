@@ -66,6 +66,4 @@ Extract ONLY ONE new exercise from the document.
             print("[ERROR]", str(e))
             break
 
-    print("\n[DEBUG] FINAL RESULT:", all_results)
-
     return all_results
