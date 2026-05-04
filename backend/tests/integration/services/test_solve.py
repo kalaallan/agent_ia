@@ -10,10 +10,8 @@ def test_process_document_real(fake_pdf_bytes):
 
     result = process_document(file_bytes, max_iterations=2)
 
-    # structure minimale
     assert isinstance(result, list)
 
-    # soit vide (LLM ne trouve rien), soit exercice valide
     if len(result) > 0:
         exercise = result[0]
 
