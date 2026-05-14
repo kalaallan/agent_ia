@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from app.api.api_router import api_router
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
 
+load_dotenv()
 
 app = FastAPI(title="AI Coach API")
 

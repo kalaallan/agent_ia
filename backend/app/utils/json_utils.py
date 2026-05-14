@@ -14,3 +14,24 @@ def safe_json_load(raw: str):
             except Exception:
                 return []
         return []
+
+
+def safe_json_load2(raw: str):
+
+    try:
+        return json.loads(raw)
+
+    except Exception:
+
+        # Cherche le premier objet JSON
+        match = re.search(r"\{.*\}", raw, re.DOTALL)
+
+        if match:
+
+            try:
+                return json.loads(match.group())
+
+            except Exception:
+                return {}
+
+        return {}

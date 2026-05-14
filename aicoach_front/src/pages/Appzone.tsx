@@ -5,18 +5,24 @@ import Hints from "../components/Hints";
 import { analysePDF } from "../services/Iacoach";
 import { comprehensionPDF } from "../services/Iacoach";
 import type { PDFResponse, ComprehensionResponse } from "../types/Iacoach_types";
+import Smart from "../components/Smart";
+import { trunk_embeddings } from "../services/rag";
 
 
 const Appzone = () => {
   const [file, setFile] = useState<File | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const [spinSmart, setSpinSmart] = useState<boolean>(false);
+  const [smartSearch, setSmartSearch] = useState<boolean>(false);
 
   const [result, setResult] = useState<PDFResponse | null>(null)
-  const [viderHints, setViderHints] = useState(false);
+  const [viderHints, setViderHints] = useState<boolean>(false);
   const [phase, setPhase] = useState<"idle" | "loading" | "result">("idle");
 
   const [onlyComprehension, setOnlyComprehension] = useState<boolean>(false);
-  const [showHint, setShowHint] = useState(false);
+  const [showHint, setShowHint] = useState<boolean>(false);
+
+  const [resTrunk, setResTrunk] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -24,9 +30,9 @@ const Appzone = () => {
     }
   };
 
-  const [showComprehension, setShowComprehension] = useState(false);
+  const [showComprehension, setShowComprehension] = useState<boolean>(false);
   const [comprehension, setComprehension] = useState<ComprehensionResponse | null>(null);
-  const [loadingComprehension, setLoadingComprehension] = useState(false);
+  const [loadingComprehension, setLoadingComprehension] = useState<boolean>(false);
 
   const handleComprehension = async () => {
     if (!file) return;
@@ -83,8 +89,11 @@ const Appzone = () => {
   };
 
   const resetAll = () => {
+    setSpinSmart(false);
+    setSmartSearch(false);
     setShowHint(false);
     setViderHints(true);
+    setResTrunk(null);
     setFile(null);
     setResult(null);
     setPhase("idle");
@@ -93,6 +102,27 @@ const Appzone = () => {
     setComprehension(null);
     setOnlyComprehension(false);
     if (inputRef.current) inputRef.current.value = "";
+  };
+
+  const trunk_embedding = async () => {
+    if (!file) return;
+    setSpinSmart(true);
+    setPhase("loading");
+    setResult(null);
+
+    try {
+      const res = await trunk_embeddings(file);
+      console.log("Résultat Smart Search API :", res);
+      setPhase("result");
+      setSmartSearch(true);
+      setResTrunk(res);
+    } catch (error) {
+      console.error("Erreur Smart Search :", error);
+      setPhase("idle");
+    } finally {
+      setSpinSmart(false);
+      setPhase("result");
+    }
   };
 
   return (
@@ -110,11 +140,12 @@ const Appzone = () => {
 
             {/* HEADER */}
             <h2 className="text-2xl font-semibold mb-2">
-              Analyse ton PDF
+              {smartSearch ? "Résultats de la recherche intelligente" : "Analyse ton PDF"}
             </h2>
 
             <p className="text-gray-600 mb-6">
-              Dépose ton fichier PDF et Appzone analysera son contenu.
+              {smartSearch ? "Tu vas saisir une idée ou une phrase du pdf pour avoir son contenu ou ce que le pdf explique." : 
+              "Dépose ton fichier PDF et Appzone analysera son contenu."}
             </p>
 
             {/* ===================== IDLE ===================== */}
@@ -169,6 +200,13 @@ const Appzone = () => {
                   >
                     Analyser le fichier
                   </button>
+                  <button
+                    onClick={trunk_embedding}
+                    disabled={!file}
+                    className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition disabled:opacity-50 ml-4"
+                  >
+                    Smart Search
+                  </button>
                 </div>
               </>
             )}
@@ -178,9 +216,23 @@ const Appzone = () => {
               <div className="flex flex-col items-center justify-center py-16">
                 <div className="w-10 h-10 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-4" />
                 <p className="text-gray-600 font-medium">
-                  Analyse du PDF en cours...
+                  {
+                    spinSmart ? "Préparation à la recherche intelligente en cours..." : "Analyse du PDF en cours..."
+                  }
                 </p>
               </div>
+            )}
+            {phase === "result" && smartSearch && (
+              <>
+                <Smart resTrunk={resTrunk} />
+                <button
+                  onClick={resetAll}
+                  className="px-5 py-2 rounded-xl bg-gray-900 text-white
+                  hover:bg-gray-800 transition shadow-sm mt-4"
+                >
+                  Nouveau PDF
+                </button>
+              </>
             )}
 
             {/* ===================== RESULT ===================== */}
